@@ -26,8 +26,8 @@ module "role_assignment" {
 
 module "password_file" {
   source            = "./password_file"
-  password_resource = module.sp_password.password_value
+  password_resource = module.sp_password.client_secret
   sp_reader_name    = var.spn_name
-  password_value    = module.sp_password.password_value
+  password_value    = module.sp_password.client_secret
   client_id         = module.service_principal.client_id
 }
