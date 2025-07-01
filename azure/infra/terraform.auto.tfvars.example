@@ -1,0 +1,10 @@
+role_assignment = {
+  reader      = "Reader"
+  contributor = "Contributor"
+}
+resource_group_name = ""
+location            = ""
+tags = {
+  project     = ""
+  environment = ""
+}

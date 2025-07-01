@@ -1,0 +1,59 @@
+{
+  "name": "Terraform Dev Container",
+  // "image": "devc-terraform:0.0.2",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "..",
+    "args": {
+      "BUILD_IMAGE_NAME": "ubuntu",
+      "BUILD_IMAGE_TAG": "jammy"
+    }
+  },
+  "features": {
+    "docker-in-docker": "latest",
+    "azure-cli": "latest"
+  },
+  "runArgs": [
+    "--name=terraform",
+    "--hostname=terraform",
+    "--env-file=.env",
+    "--network=alpine-net"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "yzhang.markdown-all-in-one",
+        "DavidAnson.vscode-markdownlint",
+        "EditorConfig.EditorConfig",
+        "ms-vscode.makefile-tools",
+        "GitLab.gitlab-workflow",
+        "redhat.vscode-yaml",
+        "VisualStudioExptTeam.vscodeintellicode",
+        "VisualStudioExptTeam.intellicode-api-usage-examples",
+        "ms-azuretools.vscode-docker",
+        "hashicorp.terraform",
+        "ms-kubernetes-tools.vscode-kubernetes-tools"
+      ],
+      "settings": {
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "/usr/bin/bash",
+            "icon": "terminal-bash"
+          }
+        }
+      }
+    }
+  },
+  "mounts": [
+    "source=${localEnv:HOME}/.ssh,target=/home/linux/.ssh,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.bash_functions,target=/home/linux/.bash_functions,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.bash_aliases,target=/home/linux/.bash_aliases,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.bashrc,target=/home/linux/.bashrc,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.kube,target=/home/linux/.kube,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.config/starship.toml,target=/home/linux/.config/starship.toml,type=bind,consistency=cached",
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind,consistency=cached"
+  ],
+  "initializeCommand": "test -f .env || touch .env",
+  "postCreateCommand": "bash -l .devcontainer/post_create_command.sh"
+}
