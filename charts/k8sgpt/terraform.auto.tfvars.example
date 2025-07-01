@@ -1,0 +1,8 @@
+secret_key = "your-plaintext-openai-secret"
+enable_service_monitor = true
+service_monitor_additional_labels = {
+  "release" = "prometheus"
+}
+service_annotations = {
+  "example.com/annotation" = "enabled"
+}

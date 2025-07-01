@@ -1,0 +1,52 @@
+version: "3"
+
+# vars:
+#   DIR: infra
+
+dotenv: [".env", "{{.ENV}}/.env", "{{.HOME}}/.env"]
+
+tasks:
+  default:
+    cmds:
+      - task --list
+
+  init:
+    dir: "{{.DIR}}"
+    desc: "Initialize terraform"
+    cmds:
+      - terraform init
+
+  plan:
+    dir: "{{.DIR}}"
+    desc: "Terraform plan"
+    cmds:
+      - terraform plan
+
+  apply:
+    dir: "{{.DIR}}"
+    desc: "Terraform apply"
+    cmds:
+      - terraform apply -auto-approve
+
+  destroy:
+    dir: "{{.DIR}}"
+    desc: "Terraform destroy"
+    cmds:
+      - terraform apply -destroy -auto-approve
+
+  fmt:
+    desc: "Terraform format"
+    cmds:
+      - terraform fmt -recursive
+
+  validate:
+    dir: "{{.DIR}}"
+    desc: "Terraform validate"
+    cmds:
+      - terraform validate
+
+  lint:
+    desc: "Format and Validate"
+    cmds:
+      - task: fmt
+      - task: validate
