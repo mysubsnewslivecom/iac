@@ -5,21 +5,11 @@ resource "azuread_application_password" "spn" {
 }
 
 resource "vault_kv_secret_v2" "azuread_credentials" {
-  mount = "kv"
-  name  = "azuread/${var.application_id}"
+  mount = var.vault_mount_path
+  name  = "azuread/${var.spn_name}"
 
   data_json = jsonencode({
-    client_id     = var.application_id
+    client_id     = var.client_id
     client_secret = azuread_application_password.spn.value
   })
-}
-
-output "client_id" {
-  value     = var.application_id
-  sensitive = true
-}
-
-output "client_secret" {
-  value     = azuread_application_password.spn.value
-  sensitive = true
 }

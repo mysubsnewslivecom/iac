@@ -12,8 +12,14 @@ variable "owner_object_id" {
 variable "subscription_id" {
   description = "Azure Subscription ID"
   type        = string
+
+  validation {
+    condition     = can(regex("^\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}$", var.subscription_id))
+    error_message = "Subscription ID must be a valid GUID."
+  }
 }
+
 variable "role_assignment" {
-  description = "Role assignment"
+  description = "Role assignment name (e.g., Contributor, Reader)"
   type        = string
 }

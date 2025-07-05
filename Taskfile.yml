@@ -1,52 +1,68 @@
+# Root Taskfile.yml
 version: "3"
 
-# vars:
-#   DIR: infra
+env:
+  ENV: build
 
-dotenv: [".env", "{{.ENV}}/.env", "{{.HOME}}/.env"]
+includes:
+  az:
+    aliases: [d]
+    taskfile: ./azure
+    dir: ./azure/infra
+  gl:
+    aliases: [gl]
+    taskfile: ./gitlab
+    dir: ./gitlab/gitlab
+  common:
+    taskfile: ./common
+
+dotenv: [".env", "{{.ENV}}.env", "{{.HOME}}/.env"]
 
 tasks:
   default:
     cmds:
       - task --list
 
-  init:
-    dir: "{{.DIR}}"
-    desc: "Initialize terraform"
-    cmds:
-      - terraform init
-
-  plan:
-    dir: "{{.DIR}}"
-    desc: "Terraform plan"
-    cmds:
-      - terraform plan
-
-  apply:
-    dir: "{{.DIR}}"
-    desc: "Terraform apply"
-    cmds:
-      - terraform apply -auto-approve
-
-  destroy:
-    dir: "{{.DIR}}"
-    desc: "Terraform destroy"
-    cmds:
-      - terraform apply -destroy -auto-approve
-
   fmt:
-    desc: "Terraform format"
+    desc: "Terraform format (recursive)"
     cmds:
-      - terraform fmt -recursive
+      - task: common:fmt-recursive
 
-  validate:
-    dir: "{{.DIR}}"
-    desc: "Terraform validate"
+  cleanup:
+    desc: Stop Vault and clean up Vault + Terraform files
     cmds:
-      - terraform validate
+      - |
+        echo "🧹 Cleaning up Vault and Terraform..."
+        find . -type d -name ".terraform" -prune -exec rm -rf {} +
+        find . -name "*.tfstate*" -type f -delete
+        find . -name ".terraform.lock.hcl" -type f -delete
 
-  lint:
-    desc: "Format and Validate"
+  vault:
+    desc: Initialize Vault in dev mode with a fixed root token and wait until it's ready
     cmds:
-      - task: fmt
-      - task: validate
+      - |
+        echo "Starting Vault in dev mode..."
+        nohup vault server -dev -dev-root-token-id=root > vault.log 2>&1 &
+        echo "Waiting for Vault to become ready..."
+        until curl -s http://127.0.0.1:8200/v1/sys/health | jq -e '.initialized == true' > /dev/null; do
+          sleep 1
+        done
+        echo "✅ Vault is ready."
+    silent: true
+
+  stop-vault:
+    desc: Stop the running Vault dev server
+    cmd: pkill -e vault && echo "process killed" || echo "no process to kill"
+    silent: true
+
+  reset:
+    desc: "Clean up and re-initialize all modules"
+    cmds:
+      - echo "🔄 Resetting all modules..."
+      - task: stop-vault
+      - task: cleanup
+      - task: re-init
+      - echo "✅ All modules reset and re-initialized successfully!"
+
+  re-init:
+    deps: [az:init, gl:init]

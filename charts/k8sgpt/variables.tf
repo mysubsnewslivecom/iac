@@ -43,7 +43,7 @@ variable "backend" {
 
 variable "resources" {
   type = object({
-    limits = map(string)
+    limits   = map(string)
     requests = map(string)
   })
   default = {
@@ -59,7 +59,7 @@ variable "resources" {
 }
 
 variable "security_context" {
-  type = map(any)
+  type    = map(any)
   default = {}
 }
 

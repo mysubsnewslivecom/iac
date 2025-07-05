@@ -53,9 +53,9 @@ resource "kubernetes_secret" "ai_backend" {
 
 resource "kubernetes_service" "k8sgpt" {
   metadata {
-    name      = var.name
-    namespace = var.namespace
-    labels    = var.labels
+    name        = var.name
+    namespace   = var.namespace
+    labels      = var.labels
     annotations = var.service_annotations
   }
 
@@ -176,29 +176,29 @@ resource "kubernetes_deployment" "k8sgpt" {
   }
 }
 
-resource "kubernetes_manifest" "service_monitor" {
-  count = var.enable_service_monitor ? 1 : 0
+# resource "kubernetes_manifest" "service_monitor" {
+#   count = var.enable_service_monitor ? 1 : 0
 
-  manifest = {
-    apiVersion = "monitoring.coreos.com/v1"
-    kind       = "ServiceMonitor"
-    metadata = {
-      name      = var.name
-      namespace = var.namespace
-      labels    = merge(var.labels, var.service_monitor_additional_labels)
-    }
-    spec = {
-      selector = {
-        matchLabels = {
-          "app.kubernetes.io/name"     = var.name
-          "app.kubernetes.io/instance" = var.name
-        }
-      }
-      endpoints = [{
-        honorLabels = true
-        path        = "/metrics"
-        port        = "metrics"
-      }]
-    }
-  }
-}
+#   manifest = {
+#     apiVersion = "monitoring.coreos.com/v1"
+#     kind       = "ServiceMonitor"
+#     metadata = {
+#       name      = var.name
+#       namespace = var.namespace
+#       labels    = merge(var.labels, var.service_monitor_additional_labels)
+#     }
+#     spec = {
+#       selector = {
+#         matchLabels = {
+#           "app.kubernetes.io/name"     = var.name
+#           "app.kubernetes.io/instance" = var.name
+#         }
+#       }
+#       endpoints = [{
+#         honorLabels = true
+#         path        = "/metrics"
+#         port        = "metrics"
+#       }]
+#     }
+#   }
+# }
