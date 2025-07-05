@@ -33,6 +33,8 @@ declare -A VERSIONS=(
   [k9s]="v0.50.2"
   [kubectl]="v1.32.0"
   [vault]="1.18.1"
+  [tofu]="1.10.2"
+  [tflint]="0.58.0"
 )
 
 # Download URLs for tools
@@ -45,6 +47,8 @@ declare -A DOWNLOAD_URLS=(
   [task]="https://taskfile.dev/install.sh"
   [flux]="https://fluxcd.io/install.sh"
   [vault]="https://releases.hashicorp.com/vault/${VERSIONS[vault]}/vault_${VERSIONS[vault]}_linux_amd64.zip"
+  [tofu]="https://github.com/opentofu/opentofu/releases/download/v${VERSIONS[tofu]}/tofu_${VERSIONS[tofu]}_linux_amd64.tar.gz"
+  [tflint]="https://github.com/terraform-linters/tflint/releases/download/v${VERSIONS[tflint]}/tflint_linux_amd64.zip"
 )
 
 # Shell completion commands
@@ -102,6 +106,9 @@ install_tool() {
     k9s)
       curl -fsSL --url "$download_url" | tar xvz -C "$DEFAULT_BIN_DIR" k9s
       ;;
+    opentofu)
+      curl -fsSL --url "$download_url" | tar xvz -C "$DEFAULT_BIN_DIR" tofu
+      ;;
     task)
       bash -c "$(curl -fsSL --location "$download_url")" -- -d -b "$DEFAULT_BIN_DIR"
       ;;
@@ -110,6 +117,9 @@ install_tool() {
       ;;
     vault)
       curl -fsSL --url "$download_url" -o vault.zip && unzip -o vault.zip vault -d "$DEFAULT_BIN_DIR/" && rm vault.zip
+      ;;
+    tflint)
+      curl -fsSL --url "$download_url" -o tflint.zip && unzip -o tflint.zip tflint -d "$DEFAULT_BIN_DIR/" && rm tflint.zip
       ;;
     *)
       log "Error: Unknown tool: $tool_name"
@@ -172,6 +182,14 @@ setup_completions() {
     log "Installed vault autocomplete"
   else
     log "Completion for vault autocomplete already exists in ~/.bashrc"
+  fi
+
+  # Install tofu autocomplete if not already installed
+  if ! grep -q 'tofu tofu' "$BASHRC"; then
+    tofu -install-autocomplete
+    log "Installed tofu autocomplete"
+  else
+    log "Completion for tofu autocomplete already exists in ~/.bashrc"
   fi
 }
 

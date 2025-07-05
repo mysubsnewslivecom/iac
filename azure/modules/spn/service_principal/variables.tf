@@ -1,10 +1,9 @@
-# modules/service_principal/variables.tf
 variable "client_id" {
-  description = "Client ID of the Azure AD application"
+  description = "The client ID (application ID) of the Azure AD application"
   type        = string
 }
 
 variable "owner_object_id" {
-  description = "Owner object ID"
+  description = "Azure AD Object ID of the owner for the service principal"
   type        = string
 }

@@ -1,0 +1,58 @@
+# gitlab/Taskfile.yml (refactored)
+version: "3"
+
+includes:
+  common:
+    taskfile: ../common
+    vars:
+      DIR: gitlab
+
+tasks:
+  default:
+    cmds:
+      - task --list
+
+  init:
+    desc: "Initialize terraform"
+    cmds:
+      - task: common:init
+
+  plan:
+    desc: "Terraform plan"
+    cmds:
+      - task: common:plan
+
+  apply:
+    desc: "Terraform apply"
+    cmds:
+      - task: common:apply
+
+  destroy:
+    desc: "Terraform destroy"
+    cmds:
+      - task: common:destroy
+
+  fmt:
+    desc: "Terraform format"
+    cmds:
+      - task: common:fmt
+
+  validate:
+    desc: "Terraform validate"
+    cmds:
+      - task: common:validate
+
+  lint:
+    desc: "Format and Validate"
+    cmds:
+      - task: common:lint
+
+  clean:
+    desc: "Clean up Azure Terraform files"
+    cmds:
+      - task: common:clean
+
+  reset:
+    desc: "Clean and re-initialize Azure module"
+    cmds:
+      - task: common:reset

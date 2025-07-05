@@ -1,0 +1,67 @@
+# common/Taskfile.yml (new shared tasks)
+
+version: "3"
+
+tasks:
+  init:
+    # desc: "Initialize terraform"
+    cmds:
+      - terraform -chdir={{.DIR}} init
+
+  plan:
+    # desc: "Terraform plan"
+    cmds:
+      - terraform -chdir={{.DIR}} plan
+
+  apply:
+    # desc: "Terraform apply"
+    cmds:
+      - terraform -chdir={{.DIR}} apply -auto-approve
+
+  destroy:
+    # desc: "Terraform destroy"
+    cmds:
+      - terraform -chdir={{.DIR}} apply -destroy -auto-approve
+
+  fmt:
+    # desc: "Terraform format"
+    cmds:
+      - terraform fmt
+
+  fmt-recursive:
+    # desc: "Terraform format (recursive)"
+    cmds:
+      - terraform fmt -recursive
+
+  validate:
+    # desc: "Terraform validate"
+    cmds:
+      - terraform validate
+
+  lint:
+    # desc: "Format and Validate"
+    cmds:
+      - task: fmt
+      - task: validate
+
+  clean:
+    # desc: "Clean up Terraform files for specific module"
+    cmds:
+      - |
+        echo "🧹 Cleaning {{.DIR}} module..."
+        # rm -rf {{.DIR}}/.terraform
+        # rm -f {{.DIR}}/*.tfstate*
+        # rm -f {{.DIR}}/.terraform.lock.hcl
+        find {{.DIR}} -type d -name ".terraform" -prune -exec rm -rf {} +
+        find {{.DIR}} -name "*.tfstate*" -type f -delete
+        find {{.DIR}} -name ".terraform.lock.hcl" -type f -delete
+        echo "✅ {{.DIR}} module cleaned"
+    silent: true
+
+  reset:
+    # desc: "Clean and re-initialize specific module"
+    cmds:
+      - task: clean
+      - task: init
+      - echo "🔄 {{.DIR}} module reset complete"
+    silent: true

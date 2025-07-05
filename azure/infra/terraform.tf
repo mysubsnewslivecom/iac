@@ -1,4 +1,6 @@
 terraform {
+  required_version = "~> 1.11"
+
   required_providers {
     azuread = {
       source  = "hashicorp/azuread"
@@ -12,5 +14,13 @@ terraform {
       source  = "hashicorp/random"
       version = "3.7.2"
     }
+    vault = {
+      source  = "hashicorp/vault"
+      version = "5.0.0"
+    }
+  }
+
+  backend "local" {
+    path = "statefile/terraform.tfstate"
   }
 }

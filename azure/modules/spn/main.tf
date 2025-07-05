@@ -1,5 +1,4 @@
 # modules/spn/main.tf
-
 module "application" {
   source          = "./application"
   spn_name        = var.spn_name
@@ -15,6 +14,8 @@ module "service_principal" {
 module "sp_password" {
   source         = "./sp_password"
   application_id = module.application.app_id
+  spn_name       = var.spn_name
+  client_id      = module.service_principal.client_id
 }
 
 module "role_assignment" {
@@ -26,8 +27,8 @@ module "role_assignment" {
 
 module "password_file" {
   source            = "./password_file"
-  password_resource = module.sp_password.password_value
-  sp_reader_name    = var.spn_name
-  password_value    = module.sp_password.password_value
+  password_resource = module.sp_password.client_secret
+  spn_name          = var.spn_name
+  password_value    = module.sp_password.client_secret
   client_id         = module.service_principal.client_id
 }
