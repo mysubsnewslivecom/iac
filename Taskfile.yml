@@ -35,14 +35,14 @@ tasks:
         echo "🧹 Cleaning up Vault and Terraform..."
         find . -type d -name ".terraform" -prune -exec rm -rf {} +
         find . -name "*.tfstate*" -type f -delete
-        find . -name ".terraform.lock.hcl" -type f -delete
+        # find . -name ".terraform.lock.hcl" -type f -delete
 
   vault:
     desc: Initialize Vault in dev mode with a fixed root token and wait until it's ready
     cmds:
       - |
         echo "Starting Vault in dev mode..."
-        nohup vault server -dev -dev-root-token-id=root > vault.log 2>&1 &
+        nohup vault server -dev -dev-root-token-id={{.VAULT_TOKEN}} > vault.log 2>&1 &
         echo "Waiting for Vault to become ready..."
         until curl -s http://127.0.0.1:8200/v1/sys/health | jq -e '.initialized == true' > /dev/null; do
           sleep 1

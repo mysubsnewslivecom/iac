@@ -106,7 +106,7 @@ install_tool() {
     k9s)
       curl -fsSL --url "$download_url" | tar xvz -C "$DEFAULT_BIN_DIR" k9s
       ;;
-    opentofu)
+    tofu)
       curl -fsSL --url "$download_url" | tar xvz -C "$DEFAULT_BIN_DIR" tofu
       ;;
     task)
