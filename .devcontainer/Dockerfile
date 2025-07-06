@@ -1,25 +1,37 @@
 # Stage 1: Build Go binaries using a lightweight Alpine image
-FROM golang:1.23-alpine3.19 AS builder
+ARG BASE_IMAGE_NAME=docker.io/golang
+ARG BASE_IMAGE_TAG=1.24.3-bookworm
+FROM ${BASE_IMAGE_NAME}:${BASE_IMAGE_TAG} AS base
+FROM base AS builder
 WORKDIR /apps
 
 # Initialize Go module (optional if you have go.mod elsewhere)
 RUN go mod init scripts
 
 # Get zerolog logging package
-RUN go get github.com/rs/zerolog/log
+RUN go get github.com/rs/zerolog/log \
+  && go get github.com/schollz/progressbar/v3 \
+  && go get github.com/spf13/cobra \
+  && go get github.com/spf13/viper \
+  && go get github.com/hashicorp/vault/api@v1.20.0 \
+  && go mod download golang.org/x/term
 
 # Copy Go source files from devcontainer folder
 COPY .devcontainer/bootstrap.go bootstrap.go
-COPY .devcontainer/healthz.go healthz.go
+# COPY .devcontainer/healthz.go healthz.go
+COPY .devcontainer/vaultcli vaultcli/
 
 # Build static Go binaries for Linux (no CGO)
 RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o /apps/bootstrap bootstrap.go
-RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o /apps/healthz healthz.go
+# RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o /apps/healthz healthz.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o /apps/vaultcli ./vaultcli/
 
 # Stage 2: Final image based on Ubuntu Jammy
-ARG BASE_IMAGE_NAME=docker.io/ubuntu
-ARG BASE_IMAGE_TAG=jammy
-FROM docker.io/ubuntu:jammy AS final
+# ARG BASE_IMAGE_NAME=docker.io/golang
+# ARG BASE_IMAGE_TAG=1.24-alpine3.22
+# ARG BASE_IMAGE_TAG=1.24-alpine3.22
+# FROM ${BASE_IMAGE_NAME}:${BASE_IMAGE_TAG} AS final
+FROM base AS final
 
 # Arguments for user setup and tool versions
 ARG USERNAME=linux
@@ -43,26 +55,26 @@ ENV \
 # Install essential packages and cleanup in single layer
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    jq \
-    sudo \
-    build-essential \
-    vim \
-    apt-transport-https \
-    apt-utils \
-    ca-certificates \
-    curl \
-    locales \
-    lsb-release \
-    openssh-client \
-    bash-completion \
-    sqlite3 \
-    skopeo \
-    unzip \
-    wget \
-    fzf \
-    fontconfig \
-    git \
-    gpg \
+  jq \
+  sudo \
+  build-essential \
+  vim \
+  apt-transport-https \
+  apt-utils \
+  ca-certificates \
+  curl \
+  locales \
+  lsb-release \
+  openssh-client \
+  bash-completion \
+  sqlite3 \
+  skopeo \
+  unzip \
+  wget \
+  fzf \
+  fontconfig \
+  git \
+  gpg \
   && locale-gen en_US.UTF-8 \
   && update-ca-certificates \
   && apt-get autoremove -y --purge \
@@ -82,7 +94,8 @@ RUN curl -fsSL https://starship.rs/install.sh | sh -s -- -y
 
 # Copy Go binaries from builder stage
 COPY --from=builder --chmod=755 /apps/bootstrap /usr/local/bin/bootstrap
-COPY --from=builder --chmod=755 /apps/healthz /usr/local/bin/healthz
+# COPY --from=builder --chmod=755 /apps/healthz /usr/local/bin/healthz
+COPY --from=builder --chmod=755 /apps/vaultcli/vaultcli /usr/local/bin/vaultcli
 
 # Switch to non-root user for remaining operations
 USER $USERNAME
@@ -107,20 +120,20 @@ RUN touch ~/.bashrc ~/.bash_aliases ~/.bash_functions ~/.bash_config \
 
 # Copy and run custom install script if present (should be last for better caching)
 COPY --chown=${USERNAME}:${USERNAME} .devcontainer/install.sh /tmp/
-RUN if [ -f /tmp/install.sh ]; then \
-      chmod +x /tmp/install.sh && \
-      /tmp/install.sh && \
-      rm /tmp/install.sh; \
-    else \
-      echo "No install.sh found, skipping custom installation"; \
-    fi
+# RUN if [ -f /tmp/install.sh ]; then \
+#   chmod +x /tmp/install.sh && \
+#   /tmp/install.sh && \
+#   rm /tmp/install.sh; \
+#   else \
+#   echo "No install.sh found, skipping custom installation"; \
+#   fi
 
 # Health check using the custom healthz binary
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD healthz
 
 # Set working directory for development
-WORKDIR /workspace
+WORKDIR /workspaces
 
 # Default command
 CMD ["/bin/bash"]

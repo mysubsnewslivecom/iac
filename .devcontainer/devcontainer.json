@@ -5,8 +5,8 @@
   //   "dockerfile": "Dockerfile",
   //   "context": "..",
   //   "args": {
-  //     "BUILD_IMAGE_NAME": "ubuntu",
-  //     "BUILD_IMAGE_TAG": "jammy"
+  //     "BUILD_IMAGE_NAME": "golang",
+  //     "BUILD_IMAGE_TAG": "1.24-alpine3.22"
   //   }
   // },
   "features": {
